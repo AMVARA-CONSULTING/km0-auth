@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title data-i18n="pageTitle">Kilómetro 0 Digital — Iniciar sesión</title>
+  <meta name="description" content="Inicio de sesión KM0 — Kilómetro 0 Digital" data-i18n-meta="metaDescription" />
+  <link rel="canonical" href="https://auth.km0digital.com/login" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <meta property="og:image" content="https://auth.km0digital.com/brand/og-preview.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/km0-auth.css" />
+</head>
+<body>
+  <div class="card">
+    <nav class="km0-lang-switch" role="navigation" aria-label="Idioma">
+      <button type="button" class="km0-lang-switch__btn" data-lang="ca">CA</button>
+      <button type="button" class="km0-lang-switch__btn km0-lang-switch__btn--active" data-lang="es">ES</button>
+      <button type="button" class="km0-lang-switch__btn" data-lang="en">EN</button>
+      <button type="button" class="km0-lang-switch__btn" data-lang="de">DE</button>
+    </nav>
+    <img class="logo" src="/logo.svg" alt="Kilómetro 0 Digital" width="72" height="72" />
+    <p class="eyebrow" data-i18n="loginEyebrow">Kilómetro 0 Digital</p>
+    <h1 id="km0-login-title" data-i18n="hubTitle">KM0 Account</h1>
+    <p class="tagline" data-i18n="landingTagline">Origen local · Impacto digital</p>
+    <p class="intro" id="km0-login-intro" data-i18n="hubLoginIntro">Inicia sesión una vez para todos los servicios KM0.</p>
+    <p class="intro" id="km0-login-service-hint" style="display:none;font-size:0.9rem;opacity:0.75;"></p>
+
+    <div class="success-banner" id="km0-registered-banner" data-i18n="registerSuccessBanner" role="status"></div>
+    <div class="success-banner" id="km0-signed-out-banner" data-i18n="hubSignedOutBanner" role="status"></div>
+    <div class="pricing-notice" data-i18n-html="registerPricingNotice"></div>
+
+    <div class="theme-form-row" id="km0-login-google-row">
+      <button type="button" class="dex-btn theme-btn-provider" id="km0-login-google" data-connector="google">
+        <span class="dex-btn-icon dex-btn-icon--google" aria-hidden="true"></span>
+        <span class="dex-btn-text" data-i18n-connector="google">Continuar con Google</span>
+      </button>
+    </div>
+
+    <p class="landing-divider" id="km0-login-divider" data-i18n="landingDividerOr">o</p>
+
+    <button type="button" class="btn-local" id="km0-local-login" data-i18n="landingCtaLocal">
+      Iniciar sesión con usuario y contraseña
+    </button>
+
+    <div id="km0-mail-activate-block" style="display:none;margin-top:1.25rem;">
+      <p class="intro" id="km0-mail-activate-hint" style="font-size:0.85rem;opacity:0.8;" data-i18n="hubLoginActivateMailHint"></p>
+      <button type="button" class="btn-primary" id="km0-login-activate-mail" data-i18n="hubLoginActivateMail" style="margin-top:0.5rem;">
+        Activar KM0 Mail
+      </button>
+      <a class="text-link" id="km0-login-mail-password" href="https://mail.km0digital.com/index.php?_task=login" data-i18n="hubMailPasswordLink">
+        O inicia sesión con contraseña del buzón (webmail)
+      </a>
+    </div>
+
+    <a class="register-link" href="/register" data-i18n="registerCreateAccountLink">¿Aún no tienes cuenta?</a>
+    <a class="text-link" href="/" data-i18n="hubBackLink">Todos los servicios</a>
+
+    <footer>
+      <a href="https://km0digital.com/" target="_blank" rel="noopener">km0digital.com</a>
+    </footer>
+  </div>
+  <script src="/i18n.js"></script>
+  <script src="/hub-auth.js"></script>
+  <script>
+    (function () {
+      'use strict';
+      var service = window.KM0HubAuth.getService();
+      var introEl = document.getElementById('km0-login-intro');
+      var hintEl = document.getElementById('km0-login-service-hint');
+
+      function t(key) {
+        return window.KM0LoginI18n ? window.KM0LoginI18n.t(key) : key;
+      }
+
+      // service is ONLY a post-login redirect hint; the login is always global KM0.
+      if (hintEl && service) {
+        var hintKey = service === 'mail' ? 'hubLoginHintMail' : 'hubLoginHintCloud';
+        hintEl.textContent = t(hintKey);
+        hintEl.style.display = 'block';
+      }
+
+      document.getElementById('km0-login-google').addEventListener('click', function () {
+        window.KM0HubAuth.startGlobalLogin('google');
+      });
+      document.getElementById('km0-local-login').addEventListener('click', function () {
+        window.KM0HubAuth.startGlobalLogin('ldap');
+      });
+
+      var activateBlock = document.getElementById('km0-mail-activate-block');
+      var activateBtn = document.getElementById('km0-login-activate-mail');
+      var passwordLink = document.getElementById('km0-login-mail-password');
+      if (passwordLink && window.KM0HubAuth.MAIL_PASSWORD_LOGIN) {
+        passwordLink.href = window.KM0HubAuth.MAIL_PASSWORD_LOGIN;
+      }
+      if (activateBtn) {
+        activateBtn.addEventListener('click', function () {
+          window.KM0HubAuth.goActivateMail();
+        });
+      }
+      if (activateBlock && service === 'mail') {
+        activateBlock.style.display = 'block';
+      }
+
+      try {
+        var params = new URLSearchParams(location.search);
+        if (params.get('registered') === '1') {
+          document.getElementById('km0-registered-banner').classList.add('success-banner--visible');
+        }
+        if (params.get('signed_out') === '1' || params.get('from_dex') === '1') {
+          window.KM0HubAuth.clearAllAuthState();
+          document.getElementById('km0-signed-out-banner').classList.add('success-banner--visible');
+          if (params.get('from_dex') === '1') {
+            params.delete('from_dex');
+            var qs = params.toString();
+            history.replaceState(null, '', location.pathname + (qs ? '?' + qs : ''));
+          }
+        } else if (params.get('session_checked') !== '1') {
+          /* Cloud stores the OIDC session; gate on cloud origin detects it. */
+          params.set('service', params.get('service') || 'cloud');
+          location.replace('https://cloud.km0digital.com/km0-session-gate.html?' + params.toString());
+          return;
+        }
+      } catch (_) {}
+    })();
+  </script>
+</body>
+</html>

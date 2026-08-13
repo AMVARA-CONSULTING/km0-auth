@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title data-i18n="hubPageTitle">Kilómetro 0 Digital — KM0 Account</title>
+  <meta name="description" content="KM0 Digital services — Kilómetro 0 Digital" data-i18n-meta="hubMetaDescription" />
+  <link rel="canonical" href="https://auth.km0digital.com/" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <meta property="og:image" content="https://auth.km0digital.com/brand/og-preview.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/km0-auth.css" />
+</head>
+<body>
+  <div class="card card--wide">
+    <nav class="km0-lang-switch" role="navigation" aria-label="Idioma">
+      <button type="button" class="km0-lang-switch__btn" data-lang="ca">CA</button>
+      <button type="button" class="km0-lang-switch__btn km0-lang-switch__btn--active" data-lang="es">ES</button>
+      <button type="button" class="km0-lang-switch__btn" data-lang="en">EN</button>
+      <button type="button" class="km0-lang-switch__btn" data-lang="de">DE</button>
+    </nav>
+    <img class="logo" src="/logo.svg" alt="Kilómetro 0 Digital" width="72" height="72" />
+    <p class="eyebrow" data-i18n="loginEyebrow">Kilómetro 0 Digital</p>
+    <h1 data-i18n="hubTitle">KM0 Account</h1>
+    <p class="tagline" data-i18n="landingTagline">Origen local · Impacto digital</p>
+    <p class="intro" data-i18n="hubIntro">Elige un servicio o inicia sesión en todos los servicios KM0.</p>
+
+    <button type="button" class="btn-primary" id="km0-unified-login" data-i18n="hubUnifiedLogin" style="width:100%;margin-bottom:1.25rem;">
+      Iniciar sesión en KM0
+    </button>
+
+    <p class="landing-divider" data-i18n="hubServiceGoToLabel">o ir directamente a</p>
+
+    <div class="service-grid">
+      <a class="service-tile" href="/login?service=cloud">
+        <strong data-i18n="hubServiceCloud">OpenCloud</strong>
+        <span data-i18n="hubServiceCloudDesc">Archivos y colaboración</span>
+      </a>
+      <a class="service-tile" href="/login?service=mail">
+        <strong data-i18n="hubServiceMail">KM0 Mail</strong>
+        <span data-i18n="hubServiceMailDesc">Correo web @km0digital.com</span>
+      </a>
+    </div>
+
+    <a class="register-link" href="/register" data-i18n="registerCreateAccountLink">¿Aún no tienes cuenta?</a>
+
+    <footer>
+      <a href="https://km0digital.com/" target="_blank" rel="noopener">km0digital.com</a>
+    </footer>
+  </div>
+  <script src="/i18n.js"></script>
+  <script src="/hub-auth.js"></script>
+  <script>
+    (function () {
+      'use strict';
+      document.getElementById('km0-unified-login').addEventListener('click', function () {
+        window.KM0HubAuth.startGlobalLogin('ldap');
+      });
+    })();
+  </script>
+</body>
+</html>

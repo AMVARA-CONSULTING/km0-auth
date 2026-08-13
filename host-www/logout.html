@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title data-i18n="logoutPageTitle">Kilómetro 0 Digital — Sesión cerrada</title>
+  <meta name="description" content="Sesión cerrada — Kilómetro 0 Digital" data-i18n-meta="logoutMetaDescription" />
+  <link rel="canonical" href="https://auth.km0digital.com/logout" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <meta property="og:image" content="https://auth.km0digital.com/brand/og-preview.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/km0-auth.css" />
+</head>
+<body>
+  <div class="card">
+    <nav class="km0-lang-switch" role="navigation" aria-label="Idioma">
+      <button type="button" class="km0-lang-switch__btn" data-lang="ca">CA</button>
+      <button type="button" class="km0-lang-switch__btn km0-lang-switch__btn--active" data-lang="es">ES</button>
+      <button type="button" class="km0-lang-switch__btn" data-lang="en">EN</button>
+      <button type="button" class="km0-lang-switch__btn" data-lang="de">DE</button>
+    </nav>
+    <img class="logo" src="/logo.svg" alt="Kilómetro 0 Digital" width="72" height="72" />
+    <p class="eyebrow" data-i18n="loginEyebrow">Kilómetro 0 Digital</p>
+    <h1 data-i18n="logoutTitle">Sesión cerrada</h1>
+    <p class="tagline" data-i18n="landingTagline">Origen local · Impacto digital</p>
+    <p class="intro" data-i18n="hubLogoutMessage">Has cerrado sesión en los servicios KM0.</p>
+
+    <div class="logout-actions">
+      <a class="btn-primary" href="/login?service=cloud" data-i18n="logoutReturnLogin">Volver a iniciar sesión</a>
+      <a class="btn-secondary" href="https://km0digital.com/" data-i18n="logoutGoHome">Ir a km0digital.com</a>
+    </div>
+
+    <footer>
+      <a href="https://km0digital.com/" target="_blank" rel="noopener">km0digital.com</a>
+    </footer>
+  </div>
+  <script src="/i18n.js"></script>
+  <script src="/hub-auth.js"></script>
+  <script>
+    (function () {
+      'use strict';
+      if (window.KM0HubAuth && window.KM0HubAuth.completeLogoutIfNeeded) {
+        window.KM0HubAuth.completeLogoutIfNeeded();
+      } else if (window.KM0HubAuth) {
+        window.KM0HubAuth.clearAllAuthState();
+      }
+    })();
+  </script>
+</body>
+</html>

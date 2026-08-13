@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title data-i18n="hubSsoContinueTitle">KM0 — Continuar a Mail</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/km0-auth.css" />
+</head>
+<body>
+  <div class="card">
+    <nav class="km0-lang-switch" role="navigation" aria-label="Idioma">
+      <button type="button" class="km0-lang-switch__btn" data-lang="ca">CA</button>
+      <button type="button" class="km0-lang-switch__btn km0-lang-switch__btn--active" data-lang="es">ES</button>
+      <button type="button" class="km0-lang-switch__btn" data-lang="en">EN</button>
+      <button type="button" class="km0-lang-switch__btn" data-lang="de">DE</button>
+    </nav>
+    <img class="logo" src="/logo.svg" alt="Kilómetro 0 Digital" width="72" height="72" />
+    <h1 data-i18n="hubSsoContinueTitle">Continuar a KM0 Mail</h1>
+    <p class="intro" data-i18n="hubSsoContinueMessage">Tu sesión en OpenCloud está activa. Elige cómo entrar al correo.</p>
+    <p class="intro" id="km0-sso-honest" style="font-size:0.85rem;opacity:0.8;" data-i18n="hubSsoContinueHonest">
+      Google (u otro IdP) es la identidad de Cloud. El correo web con OAuth usa la cuenta KM0 (LDAP) tras activar el buzón; también puedes entrar con la contraseña del buzón.
+    </p>
+
+    <button type="button" class="btn-primary" id="km0-sso-ldap-oauth" data-i18n="hubSsoContinueLdapOAuth" style="margin-top:0.5rem;">
+      Abrir webmail (cuenta KM0)
+    </button>
+    <button type="button" class="btn-local" id="km0-sso-activate" data-i18n="hubSsoContinueActivate" style="margin-top:0.75rem;">
+      Activar KM0 Mail
+    </button>
+    <a class="text-link" id="km0-sso-password" href="https://mail.km0digital.com/index.php?_task=login" data-i18n="hubMailPasswordLink">
+      O inicia sesión con contraseña del buzón (webmail)
+    </a>
+    <a class="text-link" href="/" data-i18n="hubBackLink">Todos los servicios</a>
+  </div>
+  <script src="/i18n.js"></script>
+  <script src="/hub-auth.js"></script>
+  <script>
+    (function () {
+      'use strict';
+      /* Do not auto-call prompt=none: Google-only Dex sessions fail silent LDAP OAuth
+         and used to loop. User picks LDAP OAuth, activate wizard, or password. */
+      var auth = window.KM0HubAuth;
+      if (!auth) return;
+
+      var activateBtn = document.getElementById('km0-sso-activate');
+      var ldapBtn = document.getElementById('km0-sso-ldap-oauth');
+      var passwordLink = document.getElementById('km0-sso-password');
+
+      if (passwordLink && auth.MAIL_PASSWORD_LOGIN) {
+        passwordLink.href = auth.MAIL_PASSWORD_LOGIN;
+      }
+
+      if (ldapBtn) {
+        ldapBtn.addEventListener('click', function () {
+          /* Interactive OAuth (no prompt=none): reuses LDAP Dex session when present;
+             otherwise Dex can prompt. Avoids silent-fail loops for Google-only. */
+          auth.startMailOAuth();
+        });
+      }
+      if (activateBtn) {
+        activateBtn.addEventListener('click', function () {
+          auth.goActivateMail();
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

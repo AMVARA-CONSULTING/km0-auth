@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title data-i18n="registerPageTitle">Kilómetro 0 Digital — Crear cuenta</title>
+  <meta name="description" content="Registro KM0 — Kilómetro 0 Digital" data-i18n-meta="registerMetaDescription" />
+  <link rel="canonical" href="https://auth.km0digital.com/register" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <meta property="og:image" content="https://auth.km0digital.com/brand/og-preview.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/km0-auth.css" />
+</head>
+<body>
+  <div class="card">
+    <nav class="km0-lang-switch" role="navigation" aria-label="Idioma">
+      <button type="button" class="km0-lang-switch__btn" data-lang="ca">CA</button>
+      <button type="button" class="km0-lang-switch__btn km0-lang-switch__btn--active" data-lang="es">ES</button>
+      <button type="button" class="km0-lang-switch__btn" data-lang="en">EN</button>
+      <button type="button" class="km0-lang-switch__btn" data-lang="de">DE</button>
+    </nav>
+    <img class="logo" src="/logo.svg" alt="Kilómetro 0 Digital" width="72" height="72" />
+    <p class="eyebrow" data-i18n="loginEyebrow">Kilómetro 0 Digital</p>
+    <h1 data-i18n="registerSubmit">Crear cuenta</h1>
+    <p class="tagline" data-i18n="landingTagline">Origen local · Impacto digital</p>
+    <p class="intro" data-i18n="hubRegisterIntro">Crea tu cuenta KM0 (OpenCloud + Mail).</p>
+
+    <div class="pricing-notice" data-i18n-html="registerPricingNotice"></div>
+
+    <form class="register-form" id="km0-register-form" novalidate>
+      <div class="form-error" id="km0-register-error" role="alert"></div>
+      <div class="field">
+        <label for="km0-username" data-i18n="registerUsernameLabel">Nombre de usuario</label>
+        <input type="text" id="km0-username" name="username" autocomplete="username" required
+               autocapitalize="none" spellcheck="false"
+               data-i18n-placeholder="registerUsernamePlaceholder" />
+        <p class="field-hint" id="km0-mailbox-preview" data-i18n="registerMailboxPreviewEmpty">Tu buzón será usuario@km0digital.com</p>
+      </div>
+      <div class="field">
+        <label for="km0-password" data-i18n="registerPasswordLabel">Contraseña</label>
+        <input type="password" id="km0-password" name="password" autocomplete="new-password" required minlength="8"
+               data-i18n-placeholder="registerPasswordPlaceholder" />
+      </div>
+      <div class="field">
+        <label for="km0-password-confirm" data-i18n="registerConfirmPasswordLabel">Confirmar contraseña</label>
+        <input type="password" id="km0-password-confirm" name="password_confirm" autocomplete="new-password" required
+               data-i18n-placeholder="registerConfirmPasswordPlaceholder" />
+      </div>
+      <div class="field">
+        <label for="km0-contact-email" data-i18n="registerContactEmailLabel">Correo de contacto (opcional)</label>
+        <input type="email" id="km0-contact-email" name="contact_email" autocomplete="email"
+               data-i18n-placeholder="registerContactEmailPlaceholder" />
+        <p class="field-hint" data-i18n="registerContactEmailHint">Para recuperar tu cuenta. Puede ser tu Gmail u otro correo.</p>
+      </div>
+      <button type="submit" class="btn-primary" id="km0-register-submit" data-i18n="registerSubmit">Crear cuenta</button>
+    </form>
+
+    <a class="signin-link" href="/login" data-i18n="registerSignInLink">¿Ya tienes cuenta? Inicia sesión</a>
+
+    <footer>
+      <a href="https://km0digital.com/" target="_blank" rel="noopener">km0digital.com</a>
+    </footer>
+  </div>
+  <script src="/i18n.js"></script>
+  <script src="/hub-auth.js"></script>
+  <script>
+    (function () {
+      'use strict';
+      var EMAIL_RE = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      var SPECIAL_RE = /[!@#$%^&*(),.?":{}|<>\[\]\\/_+=\-~`]/;
+      // Valid as both an IDM uid and an email local-part.
+      var USERNAME_RE = /^[a-z0-9]([a-z0-9._-]{1,30}[a-z0-9])$/;
+      var RESERVED = {
+        'postmaster': true, 'noreply': true, 'no-reply': true, 'admin': true,
+        'administrator': true, 'root': true, 'abuse': true, 'webmaster': true,
+        'hostmaster': true, 'mailer-daemon': true, 'support': true, 'info': true
+      };
+      var KM0_MAIL_DOMAIN = 'km0digital.com';
+      var form = document.getElementById('km0-register-form');
+      var errorEl = document.getElementById('km0-register-error');
+      var submitBtn = document.getElementById('km0-register-submit');
+      var usernameEl = document.getElementById('km0-username');
+      var previewEl = document.getElementById('km0-mailbox-preview');
+      var redirecting = false;
+
+      function t(key) {
+        return window.KM0LoginI18n ? window.KM0LoginI18n.t(key) : key;
+      }
+
+      function showError(key) {
+        errorEl.textContent = t(key);
+        errorEl.classList.add('form-error--visible');
+      }
+
+      function hideError() {
+        errorEl.textContent = '';
+        errorEl.classList.remove('form-error--visible');
+      }
+
+      function normalizeUsername(v) {
+        return (v || '').trim().toLowerCase();
+      }
+
+      function updatePreview() {
+        var u = normalizeUsername(usernameEl.value);
+        if (u) {
+          previewEl.textContent = t('registerMailboxPreview').replace('{mailbox}', u + '@' + KM0_MAIL_DOMAIN);
+        } else {
+          previewEl.textContent = t('registerMailboxPreviewEmpty');
+        }
+      }
+
+      usernameEl.addEventListener('input', updatePreview);
+
+      function errorKeyFromResponse(status, body) {
+        if (status === 429) return 'registerErrorRateLimit';
+        var err = body && body.error;
+        if (status === 409 || err === 'duplicate') return 'registerErrorDuplicate';
+        if (status === 503 || err === 'service_unavailable') return 'registerErrorServiceUnavailable';
+        if (status === 400) {
+          if (err === 'invalid_username' || err === 'username_reserved') return 'registerErrorUsername';
+          if (err === 'invalid_contact_email') return 'registerErrorContactEmail';
+          if (err === 'password_too_short' || err === 'password_needs_special') return 'registerErrorPasswordWeak';
+        }
+        return 'registerErrorGeneric';
+      }
+
+      form.addEventListener('submit', function (ev) {
+        ev.preventDefault();
+        hideError();
+        var username = normalizeUsername(usernameEl.value);
+        var password = document.getElementById('km0-password').value;
+        var confirm = document.getElementById('km0-password-confirm').value;
+        var contactEmail = document.getElementById('km0-contact-email').value.trim().toLowerCase();
+
+        if (!USERNAME_RE.test(username) || RESERVED[username]) { showError('registerErrorUsername'); return; }
+        if (password !== confirm) { showError('registerErrorPasswordMismatch'); return; }
+        if (password.length < 8 || !SPECIAL_RE.test(password)) { showError('registerErrorPasswordWeak'); return; }
+        if (contactEmail && !EMAIL_RE.test(contactEmail)) { showError('registerErrorContactEmail'); return; }
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = t('registerSubmitting');
+
+        var payload = {
+          username: username,
+          password: password,
+          create_mail: true
+        };
+        if (contactEmail) payload.contact_email = contactEmail;
+
+        fetch('/api/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        })
+          .then(function (resp) {
+            return resp.json().catch(function () { return {}; }).then(function (body) {
+              return { status: resp.status, body: body };
+            });
+          })
+          .then(function (result) {
+            if (result.status === 201) {
+              redirecting = true;
+              submitBtn.textContent = t('registerSigningIn');
+              window.KM0HubAuth.storePendingLogin(username, password);
+              window.KM0HubAuth.clearOidcBrowserState();
+              window.KM0HubAuth.startGlobalLogin('ldap');
+              return;
+            }
+            showError(errorKeyFromResponse(result.status, result.body));
+          })
+          .catch(function () { showError('registerErrorGeneric'); })
+          .finally(function () {
+            if (!redirecting) {
+              submitBtn.disabled = false;
+              submitBtn.textContent = t('registerSubmit');
+            }
+          });
+      });
+    })();
+  </script>
+</body>
+</html>

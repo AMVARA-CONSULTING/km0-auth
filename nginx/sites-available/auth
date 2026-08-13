@@ -1,0 +1,113 @@
+# KM0 Auth Hub — auth.km0digital.com
+# Deploy: /opt/km0-auth/scripts/deploy-auth-hub.sh
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name auth.km0digital.com;
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+        allow all;
+        try_files $uri =404;
+    }
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    http2 on;
+
+    server_name auth.km0digital.com;
+
+    ssl_certificate     /etc/letsencrypt/live/auth.km0digital.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/auth.km0digital.com/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers off;
+
+    root /var/www/km0-auth;
+    index index.html;
+
+    location /brand/ {
+        alias /var/www/km0-auth/brand/;
+        expires 7d;
+        access_log off;
+    }
+
+    location = /favicon.svg {
+        default_type image/svg+xml;
+        expires 7d;
+        access_log off;
+    }
+
+    location = /logo.svg {
+        default_type image/svg+xml;
+        expires 7d;
+        access_log off;
+    }
+
+    location = / {
+        try_files /index.html =404;
+    }
+
+    location = /login {
+        try_files /login.html =404;
+    }
+
+    location = /login.html {
+        try_files /login.html =404;
+    }
+
+    location = /register {
+        try_files /register.html =404;
+    }
+
+    location = /register.html {
+        return 301 /register$is_args$args;
+    }
+
+    location = /sso-continue {
+        try_files /sso-continue.html =404;
+    }
+
+    location = /logout {
+        try_files /logout.html =404;
+    }
+
+    location = /km0-auth.css {
+        default_type text/css;
+        expires 1h;
+    }
+
+    location = /i18n.js {
+        default_type application/javascript;
+        expires 1h;
+    }
+
+    location = /hub-auth.js {
+        default_type application/javascript;
+        expires 1h;
+    }
+
+    location = /api/register {
+        limit_req zone=km0_register burst=2 nodelay;
+        limit_req_status 429;
+
+        proxy_pass http://127.0.0.1:8091/register;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $host;
+    }
+
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+}

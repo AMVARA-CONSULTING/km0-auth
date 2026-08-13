@@ -1,0 +1,18 @@
+# OS / editor junk
+.DS_Store
+Thumbs.db
+*~
+*.swp
+
+# Backups produced by tooling
+*.bak
+*.bak.*
+*.orig
+
+# Local secrets (none tracked today; keep them out if ever added)
+.env
+.env.*
+*.key
+*.pem
+*secret*
+*.token
