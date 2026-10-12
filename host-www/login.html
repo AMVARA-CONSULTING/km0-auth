@@ -32,14 +32,14 @@
     <div class="success-banner" id="km0-signed-out-banner" data-i18n="hubSignedOutBanner" role="status"></div>
     <div class="pricing-notice" data-i18n-html="registerPricingNotice"></div>
 
-    <div class="theme-form-row" id="km0-login-google-row">
+    <div class="theme-form-row" id="km0-login-google-row" hidden>
       <button type="button" class="dex-btn theme-btn-provider" id="km0-login-google" data-connector="google">
         <span class="dex-btn-icon dex-btn-icon--google" aria-hidden="true"></span>
         <span class="dex-btn-text" data-i18n-connector="google">Continuar con Google</span>
       </button>
     </div>
 
-    <p class="landing-divider" id="km0-login-divider" data-i18n="landingDividerOr">o</p>
+    <p class="landing-divider" id="km0-login-divider" data-i18n="landingDividerOr" hidden>o</p>
 
     <button type="button" class="btn-local" id="km0-local-login" data-i18n="landingCtaLocal">
       Iniciar sesión con usuario y contraseña
@@ -63,7 +63,7 @@
     </footer>
   </div>
   <script src="/i18n.js"></script>
-  <script src="/hub-auth.js"></script>
+  <script src="/hub-auth.js?v=20261005sso"></script>
   <script>
     (function () {
       'use strict';
@@ -82,9 +82,12 @@
         hintEl.style.display = 'block';
       }
 
-      document.getElementById('km0-login-google').addEventListener('click', function () {
-        window.KM0HubAuth.startGlobalLogin('google');
-      });
+      var googleBtn = document.getElementById('km0-login-google');
+      if (googleBtn) {
+        googleBtn.addEventListener('click', function () {
+          window.KM0HubAuth.startGlobalLogin('ldap');
+        });
+      }
       document.getElementById('km0-local-login').addEventListener('click', function () {
         window.KM0HubAuth.startGlobalLogin('ldap');
       });
@@ -111,12 +114,19 @@
         }
         if (params.get('signed_out') === '1' || params.get('from_dex') === '1') {
           window.KM0HubAuth.clearAllAuthState();
+          if (service !== 'mail') {
+            window.KM0HubAuth.startGlobalLogin('ldap');
+            return;
+          }
           document.getElementById('km0-signed-out-banner').classList.add('success-banner--visible');
           if (params.get('from_dex') === '1') {
             params.delete('from_dex');
             var qs = params.toString();
             history.replaceState(null, '', location.pathname + (qs ? '?' + qs : ''));
           }
+        } else if (service !== 'mail' && params.get('session_checked') === '1') {
+          window.KM0HubAuth.startGlobalLogin('ldap');
+          return;
         } else if (params.get('session_checked') !== '1') {
           /* Cloud stores the OIDC session; gate on cloud origin detects it. */
           params.set('service', params.get('service') || 'cloud');

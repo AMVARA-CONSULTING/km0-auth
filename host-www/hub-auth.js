@@ -3,6 +3,7 @@
 
   var OIDC_SCOPE = 'openid profile email';
   var DEX_ORIGIN = 'https://cloud.km0digital.com';
+  var KEYCLOAK_ISSUER = 'https://sso.km0digital.com/realms/km0digital';
   var MAIL_ORIGIN = 'https://mail.km0digital.com';
   var CLOUD_BRIDGE = DEX_ORIGIN + '/km0-oidc-start.html';
   var MAIL_OAUTH_START = MAIL_ORIGIN + '/index.php/login/oauth';
@@ -93,9 +94,12 @@
       clearAllAuthState();
       var idToken = getStoredIdToken();
       var postLogout = location.origin + '/login?service=cloud&signed_out=1&from_dex=1';
-      var qs = new URLSearchParams({ post_logout_redirect_uri: postLogout });
+      var qs = new URLSearchParams({
+        client_id: 'opencloud-web',
+        post_logout_redirect_uri: postLogout
+      });
       if (idToken) qs.set('id_token_hint', idToken);
-      location.assign(DEX_ORIGIN + '/dex/logout?' + qs.toString());
+      location.assign(KEYCLOAK_ISSUER + '/protocol/openid-connect/logout?' + qs.toString());
       return true;
     } catch (_) {
       clearAllAuthState();
